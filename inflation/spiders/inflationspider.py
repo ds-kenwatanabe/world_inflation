@@ -1,4 +1,5 @@
 import scrapy
+import re
 
 
 class InflationSpider(scrapy.Spider):
@@ -29,11 +30,19 @@ class InflationSpider(scrapy.Spider):
                 annual_inflation = td_values[0].replace('\xa0%', '').strip()
                 average_inflation = td_values[1].replace('\xa0%', '').strip()
 
-                yield {
-                    'current_inflation_and_country': country_year,
-                    'annual_inflation': annual_inflation,
-                    'average_inflation': average_inflation
-                }
+                # Extract country and year using regex
+                match = re.match(r'CPI inflation (.+?) (\d{4})', country_year)
+                if match:
+                    # If the string matches the regex pattern, extract
+                    country = match.group(1)
+                    year = match.group(2)
+
+                    yield {
+                        'country': country,
+                        'year': year,
+                        'annual_inflation': annual_inflation,
+                        'average_inflation': average_inflation
+                    }
 
         # Extract all links from the pagination table
         pagination_links = response.css('table.notelinkstable a.notelinks::attr(href)').getall()
