@@ -1,5 +1,6 @@
 import scrapy
 import re
+from inflation.items import InflationItem
 
 
 class InflationSpider(scrapy.Spider):
@@ -37,12 +38,14 @@ class InflationSpider(scrapy.Spider):
                     country = match.group(1)
                     year = match.group(2)
 
-                    yield {
-                        'country': country,
-                        'year': year,
-                        'annual_inflation': annual_inflation,
-                        'average_inflation': average_inflation
-                    }
+                    # Initialize InflationItems
+                    inflation_item = InflationItem()
+                    inflation_item['country'] = country
+                    inflation_item['year'] = year
+                    inflation_item['annual_inflation'] = annual_inflation
+                    inflation_item['average_inflation'] = average_inflation
+
+                    yield inflation_item
 
         # Extract all links from the pagination table
         pagination_links = response.css('table.notelinkstable a.notelinks::attr(href)').getall()
