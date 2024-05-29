@@ -6,6 +6,7 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
+import mysql.connector
 
 
 class InflationPipeline:
@@ -31,3 +32,59 @@ class InflationPipeline:
             adapter[year] = int(y)
 
         return item
+
+
+class SaveToMySQLPipeline:
+    def __init__(self):
+        try:
+            self.conn = mysql.connector.connect(
+                host='localhost',
+                user='root',
+                password='password',  # Add your password
+                database='inflation'
+            )
+            self.cur = self.conn.cursor()
+            self.cur.execute(
+                '''
+                CREATE TABLE IF NOT EXISTS inflation(
+                id INTEGER NOT NULL AUTO_INCREMENT,
+                country VARCHAR(255),
+                year INTEGER,
+                average_inflation DECIMAL(10, 2),
+                annual_inflation DECIMAL(10, 2),
+                PRIMARY KEY (id)
+                )
+                '''
+            )
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            self.conn.close()
+
+    def process_item(self, item, spider):
+        adapter = ItemAdapter(item)
+
+        try:
+            self.cur.execute(
+                '''
+                INSERT INTO inflation (
+                    country,
+                    year,
+                    average_inflation,
+                    annual_inflation
+                ) VALUES (%s, %s, %s, %s)
+                ''', (
+                    adapter.get('country'),
+                    adapter.get('year'),
+                    adapter.get('average_inflation'),
+                    adapter.get('annual_inflation')
+                )
+            )
+            self.conn.commit()
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+
+        return item
+
+    def close_spider(self, spider):
+        self.cur.close()
+        self.conn.close()
