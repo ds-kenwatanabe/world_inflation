@@ -50,7 +50,7 @@ class SaveToMySQLPipeline:
             self.conn = mysql.connector.connect(
                 host='localhost',
                 user='root',
-                password='mysql',  # Add your password
+                password='',  # Add your password
                 database='inflation'
             )
             self.cur = self.conn.cursor()
@@ -77,34 +77,38 @@ class SaveToMySQLPipeline:
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
+        country = adapter.get('country')
+        year = adapter.get('year')
+        average_inflation = adapter.get('average_inflation')
+        annual_inflation = adapter.get('annual_inflation')
 
-        if self.conn is None or self.cur is None:
-            self.open_connection()
+        # Check if the item already exists
+        self.cur.execute(
+            '''SELECT id FROM inflation WHERE country = %s AND year = %s''',
+            (country, year)
+        )
+        result = self.cur.fetchone()
 
-        try:
-            self.cur.execute(
-                '''
-                INSERT INTO inflation (
-                    country,
-                    year,
-                    average_inflation,
-                    annual_inflation
-                ) VALUES (%s, %s, %s, %s)
-                ''', (
-                    adapter.get('country'),
-                    adapter.get('year'),
-                    adapter.get('average_inflation'),
-                    adapter.get('annual_inflation')
+        if result:
+            print(f"Item already exists: {country} {year}")
+        else:
+            try:
+                self.cur.execute(
+                    '''
+                    INSERT INTO inflation (
+                        country,
+                        year,
+                        average_inflation,
+                        annual_inflation
+                    ) VALUES (%s, %s, %s, %s)
+                    ''', (country, year, average_inflation, annual_inflation)
                 )
-            )
-            self.conn.commit()
-        except mysql.connector.Error as err:
-            print(f"Error inserting item: {err}")
+                self.conn.commit()
+            except mysql.connector.Error as err:
+                print(f"Error inserting item: {err}")
 
-        return item
+            return item
 
     def close_spider(self, spider):
-        if self.cur:
-            self.cur.close()
-        if self.conn:
-            self.conn.close()
+        self.cur.close()
+        self.conn.close()
