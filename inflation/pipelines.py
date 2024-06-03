@@ -13,23 +13,28 @@ class InflationPipeline:
     def process_item(self, item, spider):
         # Initialize adapter
         adapter = ItemAdapter(item)
-        # Substitute unavailable values ('-') and convert to float
+        # Substitute unavailable values ('-' and 'nan') and convert to float
         inflation_keys = ['annual_inflation', 'average_inflation']
         for key in inflation_keys:
             value = adapter.get(key)
-            if value == '-':
-                adapter[key] = None
-            else:
-                try:
-                    adapter[key] = float(value)
-                except ValueError:
-                    print(f"{value} Could not be converted to float.")
+            if value is not None:
+                value = value.strip()  # Remove any leading/trailing whitespace
+                if value.lower() == 'nan' or value == '-':
+                    adapter[key] = None
+                else:
+                    try:
+                        adapter[key] = float(value)
+                    except ValueError:
+                        print(f"{value} could not be converted to float.")
+                        adapter[key] = None
 
         # Change year to integer
-        years = ['year']
-        for year in years:
-            y = adapter.get(year)
-            adapter[year] = int(y)
+        year_value = adapter.get('year')
+        try:
+            adapter['year'] = int(year_value)
+        except (TypeError, ValueError):
+            print(f"{year_value} could not be converted to integer.")
+            adapter['year'] = None
 
         return item
 
