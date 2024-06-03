@@ -36,14 +36,25 @@ class InflationPipeline:
 
 class SaveToMySQLPipeline:
     def __init__(self):
+        self.conn = None
+        self.cur = None
+        self.open_connection()
+
+    def open_connection(self):
         try:
             self.conn = mysql.connector.connect(
                 host='localhost',
                 user='root',
-                password='password',  # Add your password
+                password='mysql',  # Add your password
                 database='inflation'
             )
             self.cur = self.conn.cursor()
+            self.create_table()
+        except mysql.connector.Error as err:
+            print(f"Error with MySQL connector: {err}")
+
+    def create_table(self):
+        try:
             self.cur.execute(
                 '''
                 CREATE TABLE IF NOT EXISTS inflation(
@@ -57,11 +68,13 @@ class SaveToMySQLPipeline:
                 '''
             )
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            self.conn.close()
+            print(f"Error creating table: {err}")
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
+
+        if self.conn is None or self.cur is None:
+            self.open_connection()
 
         try:
             self.cur.execute(
@@ -81,10 +94,12 @@ class SaveToMySQLPipeline:
             )
             self.conn.commit()
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
+            print(f"Error inserting item: {err}")
 
         return item
 
     def close_spider(self, spider):
-        self.cur.close()
-        self.conn.close()
+        if self.cur:
+            self.cur.close()
+        if self.conn:
+            self.conn.close()
