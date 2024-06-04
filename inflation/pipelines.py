@@ -23,7 +23,11 @@ class InflationPipeline:
                     adapter[key] = None
                 else:
                     try:
-                        adapter[key] = float(value)
+                        # Remove the first dot if the number is in the thousands format
+                        # Values over 1000 are set to 1.000.00, when casting to float it causes a value error
+                        if value.count('.') > 1:
+                            value = value.replace('.', '', 1)
+                        adapter[key] = float(value.replace(',', '.'))  # Replace comma with dot for float conversion
                     except ValueError:
                         print(f"{value} could not be converted to float.")
                         adapter[key] = None
