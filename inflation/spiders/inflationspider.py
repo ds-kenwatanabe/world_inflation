@@ -1,5 +1,6 @@
 import scrapy
 import re
+import random
 from inflation.items import InflationItem
 
 
@@ -12,6 +13,20 @@ class InflationSpider(scrapy.Spider):
     visited_urls = set()
 
     def parse(self, response):
+        # List of users
+        user_agent_list = [
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 '
+            'Safari/537.36',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_4_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+            'Version/14.0.3 Mobile/15E148 Safari/604.1',
+            'Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1)',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 '
+            'Safari/537.36 Edg/87.0.664.75',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 '
+            'Safari/537.36 Edge/18.18363',
+        ]
+
         # Add the current URL to the visited URLs set
         self.visited_urls.add(response.url)
 
@@ -57,4 +72,6 @@ class InflationSpider(scrapy.Spider):
             if next_page_url not in self.visited_urls:
                 # Add the next page URL to the visited set
                 self.visited_urls.add(next_page_url)
-                yield response.follow(next_page_url, callback=self.parse)
+                yield response.follow(next_page_url, callback=self.parse,
+                                      headers={"User-Agent": user_agent_list[random.randint(
+                                          0, len(user_agent_list) - 1)]})
