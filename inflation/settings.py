@@ -12,6 +12,9 @@ BOT_NAME = "inflation"
 SPIDER_MODULES = ["inflation.spiders"]
 NEWSPIDER_MODULE = "inflation.spiders"
 
+# In case you wish to use proxies, add list or path to list for ip and port
+# ROTATING_PROXY_LIST = []
+# ROTATING_PROXY_LIST_PATH = ''
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "inflation (+http://www.yourdomain.com)"
@@ -50,9 +53,11 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    "inflation.middlewares.InflationDownloaderMiddleware": 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    "inflation.middlewares.InflationDownloaderMiddleware": 543,
+    # 'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+    # 'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
