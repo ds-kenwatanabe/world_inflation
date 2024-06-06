@@ -51,7 +51,7 @@ class InflationApp:
 
         if selected_country:
             # Update the query to filter by the selected country
-            line_query = (f"SELECT year, average_inflation "
+            line_query = (f"SELECT year, average_inflation, annual_inflation "
                           f"FROM inflation "
                           f"WHERE country = '{selected_country}' "
                           f"ORDER BY year;")
@@ -64,13 +64,14 @@ class InflationApp:
             # It might change decimal to nominal
             df_line['year'] = pd.to_numeric(df_line['year'], errors='coerce')
             df_line['average_inflation'] = pd.to_numeric(df_line['average_inflation'], errors='coerce')
+            df_line['annual_inflation'] = pd.to_numeric(df_line['annual_inflation'], errors='coerce')
 
             st.subheader(f"Inflation Data for {selected_country}")
             st.write(df_line)
 
             # Create the line chart
-            st.line_chart(df_line.set_index('year')['average_inflation'],
-                          color='#ff0000', use_container_width=True)
+            st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
+                          color=['#ff0000', '#00ffff'], use_container_width=True)
 
 
 if __name__ == '__main__':
