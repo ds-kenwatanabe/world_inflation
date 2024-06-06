@@ -1,6 +1,10 @@
 import streamlit as st
 import mysql.connector
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
 
 class InflationApp:
     # Function to establish a connection to the MySQL database using secrets
@@ -27,6 +31,49 @@ class InflationApp:
         query = "SELECT DISTINCT country FROM inflation;"
         result = self.run_query(query)
         return [row['country'] for row in result]
+
+    def regression_model(self, df):
+        # set variables
+        X = df[['year']]
+        y = df['average_inflation']
+
+        # Train the model
+        model = LinearRegression()
+        model.fit(X, y)
+
+        # Make predictions for the next 10 years
+        future_years = np.arange(df['year'].max() + 1, df['year'].max() + 11).reshape(-1, 1)
+        future_predictions = model.predict(future_years)
+
+        # Create a DataFrame for future predictions
+        future_df = pd.DataFrame({
+            'year': future_years.flatten(),
+            'average_inflation': future_predictions
+        })
+
+        # Combine historical data with future predictions
+        combined_df = pd.concat([df, future_df])
+
+        return combined_df
+
+    def plot_regression(self, df, selected_country):
+        # Plot using the regression model dataframe
+        combined_df = self.regression_model(df)
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(combined_df['year'], combined_df['average_inflation'], ls='--', color='#ff0000',
+                 label='Forecasted Inflation')
+        plt.plot(df['year'], df['average_inflation'], color='#00ffff', label='Historical Inflation')
+        plt.xlabel('Year', color='white')
+        plt.ylabel('Average Inflation', color='white')
+        plt.title(f'Inflation Forecast for {selected_country}', color='white')
+        plt.legend()
+        plt.grid(True, color='white')
+        # Set the background color to be transparent
+        plt.gca().set_facecolor('none')
+        plt.gcf().patch.set_facecolor('none')
+        # Plot the image
+        st.pyplot(plt)
 
     def ui(self):
         # Streamlit UI
@@ -79,7 +126,11 @@ class InflationApp:
 
             # Create the line chart with both average and annual inflation
             st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
-                          color=['#ff0000', '#00ffff'], use_container_width=True)
+                          color=['#00ffff', '#ff0000'], use_container_width=True)
+
+            # Run regression model
+            self.regression_model(df_line)
+            self.plot_regression(df_line, selected_country)
 
 
 if __name__ == '__main__':
