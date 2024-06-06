@@ -32,14 +32,6 @@ class InflationPipeline:
                         print(f"{value} could not be converted to float.")
                         adapter[key] = None
 
-        # Change year to integer
-        year_value = adapter.get('year')
-        try:
-            adapter['year'] = int(year_value)
-        except (TypeError, ValueError):
-            print(f"{year_value} could not be converted to integer.")
-            adapter['year'] = None
-
         return item
 
 
@@ -69,7 +61,7 @@ class SaveToMySQLPipeline:
                 CREATE TABLE IF NOT EXISTS inflation(
                 id INTEGER NOT NULL AUTO_INCREMENT,
                 country VARCHAR(255),
-                year INTEGER,
+                year YEAR,
                 average_inflation DECIMAL(10, 2),
                 annual_inflation DECIMAL(10, 2),
                 PRIMARY KEY (id)
