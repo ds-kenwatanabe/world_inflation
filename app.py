@@ -28,12 +28,21 @@ class InflationApp:
         result = self.run_query(query)
         return [row['country'] for row in result]
 
-    def ui(self, query):
+    def ui(self):
         # Streamlit UI
-        st.title("Country Average Inflation Since 1956")
+        st.title("Countries Inflation")
+
+        # Year picker
+        selected_year = st.slider("Select a year", min_value=1956, max_value=2024, value=2024)
+
+        # Update the query to filter by the selected year
+        sql_query = (f"SELECT country, year, average_inflation, annual_inflation "
+                     f"FROM inflation "
+                     f"WHERE year = {selected_year} "
+                     f"ORDER BY average_inflation DESC;")
 
         # Display all users from the database
-        inflation = self.run_query(query)
+        inflation = self.run_query(sql_query)
 
         # Convert the result into a DataFrame for easier handling
         df = pd.DataFrame(inflation)
@@ -42,7 +51,7 @@ class InflationApp:
         df['average_inflation'] = pd.to_numeric(df['average_inflation'], errors='coerce')
         df['annual_inflation'] = pd.to_numeric(df['annual_inflation'], errors='coerce')
 
-        st.subheader("Venezuela and Argentina excluded")
+        st.subheader(f"Inflation Data for {selected_year}")
         st.write(df)
 
         # Get list of countries for the selectbox
@@ -61,7 +70,6 @@ class InflationApp:
             df_line = pd.DataFrame(inflation_line)
 
             # Ensure numeric columns are correctly typed
-            # It might change decimal to nominal
             df_line['year'] = pd.to_numeric(df_line['year'], errors='coerce')
             df_line['average_inflation'] = pd.to_numeric(df_line['average_inflation'], errors='coerce')
             df_line['annual_inflation'] = pd.to_numeric(df_line['annual_inflation'], errors='coerce')
@@ -69,7 +77,7 @@ class InflationApp:
             st.subheader(f"Inflation Data for {selected_country}")
             st.write(df_line)
 
-            # Create the line chart
+            # Create the line chart with both average and annual inflation
             st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
                           color=['#ff0000', '#00ffff'], use_container_width=True)
 
@@ -77,8 +85,4 @@ class InflationApp:
 if __name__ == '__main__':
     app = InflationApp()
     app.get_connection()
-    sql_query = ("SELECT country, year, average_inflation, annual_inflation "
-                 "FROM inflation "
-                 "ORDER BY average_inflation DESC;")
-    app.run_query(sql_query)
-    app.ui(sql_query)
+    app.ui()
