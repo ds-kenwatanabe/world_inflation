@@ -33,6 +33,8 @@ class InflationApp:
         return [row['country'] for row in result]
 
     def regression_model(self, df):
+        # Drop None values
+        df = df.dropna()
         # set variables
         X = df[['year']]
         y = df['average_inflation']
@@ -68,7 +70,15 @@ class InflationApp:
         plt.ylabel('Average Inflation', color='white')
         plt.title(f'Inflation Forecast for {selected_country}', color='white')
         plt.legend()
-        plt.grid(True, color='white')
+        plt.grid(True, color='#c0c0c0', linewidth=0.1)
+
+        # Customize axis labels and ticks
+        ax = plt.gca()
+        ax.xaxis.label.set_color('white')
+        ax.yaxis.label.set_color('white')
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
+
         # Set the background color to be transparent
         plt.gca().set_facecolor('none')
         plt.gcf().patch.set_facecolor('none')
@@ -128,9 +138,16 @@ class InflationApp:
             st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
                           color=['#00ffff', '#ff0000'], use_container_width=True)
 
-            # Run regression model
-            self.regression_model(df_line)
-            self.plot_regression(df_line, selected_country)
+            # Run regression query
+            reg_query = (f"SELECT year, average_inflation "
+                         f"FROM inflation "
+                         f"WHERE country = '{selected_country}' "
+                         f"ORDER BY year;")
+            reg_run_query = self.run_query(reg_query)
+            df_reg = pd.DataFrame(reg_run_query)
+            # Run and plot regression model
+            self.regression_model(df_reg)
+            self.plot_regression(df_reg, selected_country)
 
 
 if __name__ == '__main__':
