@@ -157,7 +157,21 @@ class InflationApp:
             st.header("Home")
             st.write("Welcome to the Inflation Data App.")
             st.write("""
-                    This application provides an overview and analysis of inflation data across different countries.
+                    This application provides an overview and analysis of inflation data across different countries 
+                    using the consumer price index (CPI).
+                    
+                    A consumer price index (CPI) measures the average change in prices over time for a basket of 
+                    consumer goods and services commonly purchased by households. 
+                    
+                    By monitoring changes in this index, we can track price fluctuations and inflation. 
+                    The CPI is determined using a representative basket of goods and services, 
+                    which is periodically updated to reflect shifts in consumer spending habits. 
+                    Prices for the items in this basket are gathered monthly from a sample of retail and 
+                    service establishments and are adjusted for any changes in quality or features. 
+                    
+                    While the CPI is not a perfect measure of inflation or cost of living, 
+                    it remains a valuable tool for tracking these economic indicators and comparing 
+                    inflation rates across different countries.
 
                     **Features:**
                     - View inflation data for a selected year.
