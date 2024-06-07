@@ -149,6 +149,10 @@ class InflationApp:
             self.regression_model(df_reg)
             self.plot_regression(df_reg, selected_country)
 
+        # References link
+        st.subheader("Reference site for inflation data:")
+        st.page_link("https://www.inflation.eu/en/", label='inflation.eu website', icon='🌎')
+
 
 if __name__ == '__main__':
     app = InflationApp()
