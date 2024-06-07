@@ -111,6 +111,26 @@ class InflationApp:
         st.subheader(f"Inflation Data for {selected_year}")
         st.write(df)
 
+        # Summary statistics
+        st.subheader(f"Summary Statistics for {selected_year}")
+        st.write(df[["average_inflation", "annual_inflation"]].describe())
+
+        # Histogram for distribution
+        st.subheader(f"Inflation Distribution for {selected_year} (bins of 100)")
+        fig, ax = plt.subplots()
+        df['average_inflation'].plot(kind='hist', bins=100, ax=ax)
+
+        # Set ax colors
+        ax.xaxis.label.set_color('white')
+        ax.yaxis.label.set_color('white')
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
+
+        # Set the background color to be transparent
+        plt.gca().set_facecolor('none')
+        plt.gcf().patch.set_facecolor('none')
+        st.pyplot(fig)
+
         # Get list of countries for the selectbox
         countries = self.get_countries()
         selected_country = st.selectbox("Select a country", countries)
@@ -159,16 +179,16 @@ class InflationApp:
             st.write("""
                     This application provides an overview and analysis of inflation data across different countries 
                     using the consumer price index (CPI).
-                    
+
                     A consumer price index (CPI) measures the average change in prices over time for a basket of 
                     consumer goods and services commonly purchased by households. 
-                    
+
                     By monitoring changes in this index, we can track price fluctuations and inflation. 
                     The CPI is determined using a representative basket of goods and services, 
                     which is periodically updated to reflect shifts in consumer spending habits. 
                     Prices for the items in this basket are gathered monthly from a sample of retail and 
                     service establishments and are adjusted for any changes in quality or features. 
-                    
+
                     While the CPI is not a perfect measure of inflation or cost of living, 
                     it remains a valuable tool for tracking these economic indicators and comparing 
                     inflation rates across different countries.
@@ -187,8 +207,11 @@ class InflationApp:
             st.header("References")
             st.markdown(":globe_with_meridians: [inflation.eu website](https://www.inflation.eu/en/)")
 
+    def ui(self):
+        self.sidebar()
+
 
 if __name__ == '__main__':
     app = InflationApp()
     app.get_connection()
-    app.sidebar()
+    app.ui()
