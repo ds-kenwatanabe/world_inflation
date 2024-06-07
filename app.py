@@ -87,7 +87,7 @@ class InflationApp:
 
     def display_inflation_data(self):
         # Streamlit UI
-        st.title("Countries Inflation")
+        st.title("Countries CPI Inflation")
 
         # Year picker
         selected_year = st.slider("Select a year", min_value=1956, max_value=2024, value=2024)
@@ -151,22 +151,30 @@ class InflationApp:
 
     def sidebar(self):
         st.sidebar.title("Navigation")
-        selection = st.sidebar.radio("Go to", ["Home", "Inflation Data", "Reference"])
+        selection = st.sidebar.radio("Go to", ["Home", "Inflation Data", "References"])
 
         if selection == "Home":
             st.header("Home")
             st.write("Welcome to the Inflation Data App.")
+            st.write("""
+                    This application provides an overview and analysis of inflation data across different countries.
+
+                    **Features:**
+                    - View inflation data for a selected year.
+                    - Select a country to see CPI inflation data.
+                    - Forecast future inflation trends using linear regression.
+
+                    Use the sidebar to navigate between different sections of the app.
+                    """)
+            st.image("/home/chris/Pictures/inflation/00044-1625230760.png")
         elif selection == "Inflation Data":
             self.display_inflation_data()
-        elif selection == "Reference":
-            st.header("Reference")
-            st.markdown("[inflation.eu website](https://www.inflation.eu/en/)")
-
-    def ui(self):
-        self.sidebar()
+        elif selection == "References":
+            st.header("References")
+            st.markdown(":globe_with_meridians: [inflation.eu website](https://www.inflation.eu/en/)")
 
 
 if __name__ == '__main__':
     app = InflationApp()
     app.get_connection()
-    app.ui()
+    app.sidebar()
