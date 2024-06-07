@@ -85,7 +85,7 @@ class InflationApp:
         # Plot the image
         st.pyplot(plt)
 
-    def ui(self):
+    def display_inflation_data(self):
         # Streamlit UI
         st.title("Countries Inflation")
 
@@ -149,9 +149,21 @@ class InflationApp:
             self.regression_model(df_reg)
             self.plot_regression(df_reg, selected_country)
 
-        # References link
-        st.subheader("Reference site for inflation data:")
-        st.page_link("https://www.inflation.eu/en/", label='inflation.eu website', icon='🌎')
+    def sidebar(self):
+        st.sidebar.title("Navigation")
+        selection = st.sidebar.radio("Go to", ["Home", "Inflation Data", "Reference"])
+
+        if selection == "Home":
+            st.header("Home")
+            st.write("Welcome to the Inflation Data App.")
+        elif selection == "Inflation Data":
+            self.display_inflation_data()
+        elif selection == "Reference":
+            st.header("Reference")
+            st.markdown("[inflation.eu website](https://www.inflation.eu/en/)")
+
+    def ui(self):
+        self.sidebar()
 
 
 if __name__ == '__main__':
