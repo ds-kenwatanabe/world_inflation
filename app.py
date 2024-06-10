@@ -3,7 +3,7 @@ import mysql.connector
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
+from matplotlib.ticker import MaxNLocator
 from sklearn.linear_model import LinearRegression
 
 
@@ -119,8 +119,7 @@ class InflationApp:
         # Histogram for distribution
         st.subheader(f"Normalized Average Inflation Distribution for {selected_year} (bins of 100)")
         fig, ax = plt.subplots()
-        plt.hist(df['average_inflation'], bins=100, color='cyan', edgecolor='black',
-                 density=True, stacked=True)
+        plt.hist(df['average_inflation'], bins=100, color='cyan', edgecolor='black', density=True, stacked=True)
 
         # Set ax colors and labels
         ax.set_xlabel('Inflation Percentage', color='white')
@@ -129,6 +128,9 @@ class InflationApp:
         ax.yaxis.label.set_color('white')
         ax.tick_params(axis='x', colors='white')
         ax.tick_params(axis='y', colors='white')
+
+        # Set x-axis ticks
+        ax.xaxis.set_major_locator(MaxNLocator(nbins=20))
 
         # Set the background color to be transparent
         plt.gca().set_facecolor('none')
@@ -140,7 +142,7 @@ class InflationApp:
         # Drop None values, current year not available
         df_annual_inflation = df['annual_inflation'].dropna()
 
-        plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black')
+        plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black', density=True, stacked=True)
 
         # Set ax colors and labels
         ax2.set_xlabel('Inflation Percentage', color='white')
@@ -149,6 +151,9 @@ class InflationApp:
         ax2.yaxis.label.set_color('white')
         ax2.tick_params(axis='x', colors='white')
         ax2.tick_params(axis='y', colors='white')
+
+        # Set x-axis ticks
+        ax2.xaxis.set_major_locator(MaxNLocator(nbins=20))
 
         # Set the background color to be transparent
         plt.gca().set_facecolor('none')
