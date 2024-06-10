@@ -116,49 +116,105 @@ class InflationApp:
         st.subheader(f"Summary Statistics for {selected_year}")
         st.write(df[["average_inflation", "annual_inflation"]].describe())
 
+        # Determine min and max inflation values
+        min_inflation = df['average_inflation'].min()
+        max_inflation = df['average_inflation'].max()
+
+        # Calculate the bin width
+        bin_width = (max_inflation - min_inflation) / 100
+
         # Histogram for distribution
-        st.subheader(f"Normalized Average Inflation Distribution for {selected_year} (bins of 100)")
+        st.subheader(f"Normalized Average Inflation Distribution for {selected_year}")
         fig, ax = plt.subplots()
-        plt.hist(df['average_inflation'], bins=100, color='cyan', edgecolor='black', density=True, stacked=True)
+        counts, bins, patches = plt.hist(df['average_inflation'], bins=100, color='cyan', edgecolor='black',
+                                         density=True, stacked=True)
 
         # Set ax colors and labels
         ax.set_xlabel('Inflation Percentage', color='white')
-        ax.set_ylabel('Probability', color='white')
+        ax.set_ylabel('Probability Density', color='white')
         ax.xaxis.label.set_color('white')
         ax.yaxis.label.set_color('white')
         ax.tick_params(axis='x', colors='white')
         ax.tick_params(axis='y', colors='white')
 
         # Set x-axis ticks
-        ax.xaxis.set_major_locator(MaxNLocator(nbins=20))
+        ax.xaxis.set_major_locator(MaxNLocator(nbins=15))
 
         # Set the background color to be transparent
         plt.gca().set_facecolor('none')
         plt.gcf().patch.set_facecolor('none')
         st.pyplot(fig)
 
-        st.subheader(f"Normalized Annual Inflation Distribution for {selected_year} (dec vs. dec, bins of 100)")
+        # Description
+        st.write("*Normalization of Histogram*: When a histogram is normalized, "
+                 "the area under the histogram sums to 1. "
+                 "This means each bar's height represents the relative frequency "
+                 "or density rather than the raw count of observations.\n"
+                 "\n*Y-axis Interpretation*: The y-axis in a normalized histogram shows the density, "
+                 "which is the frequency per unit interval of the x-axis. "
+                 "This means if you sum the areas of all bars, you will get 1, representing the entire dataset.\n"
+                 "\n*Bar Height*: If a bar reaches 0.35 on the y-axis, this means that the density of that interval "
+                 "is 0.35, not that there is a 35% chance of the values in that interval occurring. "
+                 "The probability of a value falling within a specific interval is found by multiplying "
+                 "the height (density) by the width of the interval, which you can try below.")
+
+        # Bin selection slider
+        st.subheader("Select a bin to see the probability")
+        selected_bin = st.slider("Select bin for the average inflation", 0, 99, 0)
+
+        # Calculate the probability for the selected bin
+        selected_density = counts[selected_bin]
+        selected_bin_start = bins[selected_bin]
+        selected_bin_end = bins[selected_bin + 1]
+        selected_bin_probability = selected_density * bin_width
+
+        st.write(f"Selected bin: {selected_bin}")
+        st.write(f"Bin range: {selected_bin_start:.2f} to {selected_bin_end:.2f}")
+        st.write(f"Probability: {selected_bin_probability:.4f} or {100 * selected_bin_probability:.2f}%")
+
+        # Determine min and max inflation values
+        min_annual_inflation = df['annual_inflation'].min()
+        max_annual_inflation = df['annual_inflation'].max()
+
+        # Calculate the bin width
+        bin_width_annual = (max_annual_inflation - min_annual_inflation) / 100
+
+        st.subheader(f"Normalized Annual Inflation Distribution for {selected_year} (dec vs. dec)")
         fig2, ax2 = plt.subplots()
         # Drop None values, current year not available
         df_annual_inflation = df['annual_inflation'].dropna()
 
-        plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black', density=True, stacked=True)
+        counts2, bins2, patches2 = plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black', density=True, stacked=True)
 
         # Set ax colors and labels
         ax2.set_xlabel('Inflation Percentage', color='white')
-        ax2.set_ylabel('Probability', color='white')
+        ax2.set_ylabel('Probability Density', color='white')
         ax2.xaxis.label.set_color('white')
         ax2.yaxis.label.set_color('white')
         ax2.tick_params(axis='x', colors='white')
         ax2.tick_params(axis='y', colors='white')
 
         # Set x-axis ticks
-        ax2.xaxis.set_major_locator(MaxNLocator(nbins=20))
+        ax2.xaxis.set_major_locator(MaxNLocator(nbins=15))
 
         # Set the background color to be transparent
         plt.gca().set_facecolor('none')
         plt.gcf().patch.set_facecolor('none')
         st.pyplot(fig2)
+
+        # Bin selection slider
+        st.subheader("Select a bin to see the probability")
+        selected_bin2 = st.slider("Select bin for the annual inflation", 0, 99, 0)
+
+        # Calculate the probability for the selected bin
+        selected_density2 = counts2[selected_bin2]
+        selected_bin_start2 = bins2[selected_bin2]
+        selected_bin_end2 = bins2[selected_bin2 + 1]
+        selected_bin_probability2 = selected_density2 * bin_width_annual
+
+        st.write(f"Selected bin: {selected_bin2}")
+        st.write(f"Bin range: {selected_bin_start2:.2f} to {selected_bin_end2:.2f}")
+        st.write(f"Probability: {selected_bin_probability2:.4f} or {100 * selected_bin_probability2:.2f}%")
 
         # Get list of countries for the selectbox
         countries = self.get_countries()
