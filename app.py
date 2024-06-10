@@ -3,6 +3,7 @@ import mysql.connector
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.linear_model import LinearRegression
 
 
@@ -116,11 +117,14 @@ class InflationApp:
         st.write(df[["average_inflation", "annual_inflation"]].describe())
 
         # Histogram for distribution
-        st.subheader(f"Average Inflation Distribution for {selected_year} (bins of 100)")
+        st.subheader(f"Normalized Average Inflation Distribution for {selected_year} (bins of 100)")
         fig, ax = plt.subplots()
-        plt.hist(df['average_inflation'], bins=100, color='cyan')
+        plt.hist(df['average_inflation'], bins=100, color='cyan', edgecolor='black',
+                 density=True, stacked=True)
 
-        # Set ax colors
+        # Set ax colors and labels
+        ax.set_xlabel('Inflation Percentage', color='white')
+        ax.set_ylabel('Probability', color='white')
         ax.xaxis.label.set_color('white')
         ax.yaxis.label.set_color('white')
         ax.tick_params(axis='x', colors='white')
@@ -131,14 +135,16 @@ class InflationApp:
         plt.gcf().patch.set_facecolor('none')
         st.pyplot(fig)
 
-        st.subheader(f"Annual Inflation Distribution for {selected_year} (dec vs. dec, bins of 100)")
+        st.subheader(f"Normalized Annual Inflation Distribution for {selected_year} (dec vs. dec, bins of 100)")
         fig2, ax2 = plt.subplots()
         # Drop None values, current year not available
         df_annual_inflation = df['annual_inflation'].dropna()
 
-        plt.hist(df_annual_inflation, bins=100, color='red')
+        plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black')
 
-        # Set ax colors
+        # Set ax colors and labels
+        ax2.set_xlabel('Inflation Percentage', color='white')
+        ax2.set_ylabel('Probability', color='white')
         ax2.xaxis.label.set_color('white')
         ax2.yaxis.label.set_color('white')
         ax2.tick_params(axis='x', colors='white')
