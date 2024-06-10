@@ -116,9 +116,9 @@ class InflationApp:
         st.write(df[["average_inflation", "annual_inflation"]].describe())
 
         # Histogram for distribution
-        st.subheader(f"Inflation Distribution for {selected_year} (bins of 100)")
+        st.subheader(f"Average Inflation Distribution for {selected_year} (bins of 100)")
         fig, ax = plt.subplots()
-        df['average_inflation'].plot(kind='hist', bins=100, ax=ax)
+        plt.hist(df['average_inflation'], bins=100, color='cyan')
 
         # Set ax colors
         ax.xaxis.label.set_color('white')
@@ -130,6 +130,24 @@ class InflationApp:
         plt.gca().set_facecolor('none')
         plt.gcf().patch.set_facecolor('none')
         st.pyplot(fig)
+
+        st.subheader(f"Annual Inflation Distribution for {selected_year} (dec vs. dec, bins of 100)")
+        fig2, ax2 = plt.subplots()
+        # Drop None values, current year not available
+        df_annual_inflation = df['annual_inflation'].dropna()
+
+        plt.hist(df_annual_inflation, bins=100, color='red')
+
+        # Set ax colors
+        ax2.xaxis.label.set_color('white')
+        ax2.yaxis.label.set_color('white')
+        ax2.tick_params(axis='x', colors='white')
+        ax2.tick_params(axis='y', colors='white')
+
+        # Set the background color to be transparent
+        plt.gca().set_facecolor('none')
+        plt.gcf().patch.set_facecolor('none')
+        st.pyplot(fig2)
 
         # Get list of countries for the selectbox
         countries = self.get_countries()
