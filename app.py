@@ -216,6 +216,10 @@ class InflationApp:
         st.write(f"Bin range: {selected_bin_start2:.2f} to {selected_bin_end2:.2f}")
         st.write(f"Probability: {selected_bin_probability2:.4f} or {100 * selected_bin_probability2:.2f}%")
 
+        # Description for countries
+        st.write(":earth_americas: Next you can select a country and see the inflation values for each recorded year."
+                 "The line plot shows how the inflation values developed over the years.")
+
         # Get list of countries for the selectbox
         countries = self.get_countries()
         selected_country = st.selectbox("Select a country", countries)
@@ -291,6 +295,8 @@ class InflationApp:
         elif selection == "References":
             st.header("References")
             st.markdown(":globe_with_meridians: [inflation.eu website](https://www.inflation.eu/en/)")
+            st.markdown(":link: [About histograms](https://en.wikipedia.org/wiki/Histogram)")
+            st.markdown(":link: [Probability Density Function (PDF)](https://en.wikipedia.org/wiki/Histogram)")
 
     def ui(self):
         self.sidebar()
