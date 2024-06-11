@@ -157,7 +157,7 @@ class InflationApp:
         y = df['average_inflation'].values
 
         # Fit the ARIMA model
-        model = ARIMA(y, order=(5, 1, 0))
+        model = ARIMA(y, order=(5, 1, 1))
         model_fit = model.fit()
 
         # Make predictions for the next 10 years
@@ -466,14 +466,23 @@ class InflationApp:
                      "(the order of the autoregressive part). 𝑑 is the number of times the raw observations are "
                      "differenced to make the time series stationary (the order of differencing). "
                      "𝑞 is the size of the moving average window (the order of the moving average part).\n"
-                     "* The model used was a ARIMA(5, 1, 0). This means the model uses the previous 5 lagged values"
-                     "(years) of the series to predict the current value.\n"
+                     "* The model used was a ARIMA(5, 1, 1). This means the model uses the previous 5 lagged values"
+                     " (years) of the series to predict the current value.\n"
                      "The series is differenced once to achieve stationarity, "
                      "meaning that the model looks at the difference between consecutive observations rather "
                      "than the observations themselves.\n"
-                     "And the model includes lagged forecast errors in the model, due to probable "
-                     "autocorrelation and partial autocorrelation.\n"
-                     "Ideally, for every country the model would be evaluated to better determine p and q values.\n"
+                     "And the model includes one lagged forecast error in the model, due to probable "
+                     "autocorrelation and partial autocorrelation. Economic time series data like inflation often "
+                     "exhibit autocorrelation due to economic cycles, monetary policies, and persistent shocks.\n"
+                     "However, ideally for every country the model would be evaluated to better "
+                     "determine p and q values.\n"
+                     "\nIn short:\n"
+                     "\nARIMA(5, 1, 1) Model\n"
+                     "* AR(5): The model uses the previous 5 values of the time series (lagged observations) "
+                     "to predict the current value, accounting for longer-term dependencies.\n"
+                     "* I(1): Differencing once to remove trends and make the time series stationary.\n"
+                     "* MA(1): The model uses the error term from the previous time step to predict the current value, "
+                     "capturing short-term dependencies.\n"
                      "\nPros:\n"
                      "* Captures Temporal Dependencies - Effectively models time series data "
                      "with trends and seasonality.\n"
@@ -485,7 +494,7 @@ class InflationApp:
                      "which can be complex.\n"
                      "* Data Preprocessing - Needs data to be stationary, which requires preprocessing "
                      "such as differencing.\n"
-                     "More Computationally Intensive - Can be computationally intensive, especially with "
+                     "* More Computationally Intensive - Can be computationally intensive, especially with "
                      "large datasets or complex models.")
 
             # Run and plot ARIMA model
