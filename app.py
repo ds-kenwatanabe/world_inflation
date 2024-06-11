@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from statsmodels.tsa.arima.model import ARIMA
 
 
 class InflationApp:
@@ -66,6 +68,150 @@ class InflationApp:
         plt.figure(figsize=(10, 6))
         plt.plot(combined_df['year'], combined_df['average_inflation'], ls='--', color='#ff0000',
                  label='Forecasted Inflation')
+        plt.plot(df['year'], df['average_inflation'], color='#00ffff', label='Historical Inflation')
+        plt.xlabel('Year', color='white')
+        plt.ylabel('Average Inflation', color='white')
+        plt.title(f'Inflation Forecast for {selected_country}', color='white')
+        plt.legend()
+        plt.grid(True, color='#c0c0c0', linewidth=0.1)
+
+        # Customize axis labels and ticks
+        ax = plt.gca()
+        ax.xaxis.label.set_color('white')
+        ax.yaxis.label.set_color('white')
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
+
+        # Set the background color to be transparent
+        plt.gca().set_facecolor('none')
+        plt.gcf().patch.set_facecolor('none')
+        # Plot the image
+        st.pyplot(plt)
+
+    def regression_model_poly(self, df):
+        # Drop None values
+        df = df.dropna()
+        # Set variables
+        X = df[['year']]
+        y = df['average_inflation']
+
+        # Add polynomial features
+        poly = PolynomialFeatures(degree=3)
+        X_poly = poly.fit_transform(X)
+
+        # Train the model
+        model = LinearRegression()
+        model.fit(X_poly, y)
+
+        # Make predictions for the next 10 years
+        future_years = np.arange(df['year'].max() + 1, df['year'].max() + 11).reshape(-1, 1)
+        future_years_poly = poly.transform(future_years)
+        future_predictions = model.predict(future_years_poly)
+
+        # Create a DataFrame for future predictions
+        future_df = pd.DataFrame({
+            'year': future_years.flatten(),
+            'average_inflation': future_predictions
+        })
+
+        # Combine historical data with future predictions
+        combined_df = pd.concat([df, future_df])
+
+        return combined_df
+
+    def plot_regression_poly(self, df, selected_country):
+        # Plot using the regression model dataframe
+        combined_df = self.regression_model(df)
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(combined_df['year'], combined_df['average_inflation'], ls='--', color='#ff0000',
+                 label='Forecasted Inflation')
+        plt.plot(df['year'], df['average_inflation'], color='#00ffff', label='Historical Inflation')
+        plt.xlabel('Year', color='white')
+        plt.ylabel('Average Inflation', color='white')
+        plt.title(f'Inflation Forecast for {selected_country}', color='white')
+        plt.legend()
+        plt.grid(True, color='#c0c0c0', linewidth=0.1)
+
+        # Customize axis labels and ticks
+        ax = plt.gca()
+        ax.xaxis.label.set_color('white')
+        ax.yaxis.label.set_color('white')
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
+
+        # Set the background color to be transparent
+        plt.gca().set_facecolor('none')
+        plt.gcf().patch.set_facecolor('none')
+        # Plot the image
+        st.pyplot(plt)
+
+    def arima_model(self, df):
+        # Drop None values
+        df = df.dropna()
+
+        # Ensure 'average_inflation' is numeric
+        df['average_inflation'] = pd.to_numeric(df['average_inflation'], errors='coerce')
+        df = df.dropna(subset=['average_inflation'])
+
+        y = df['average_inflation'].values
+
+        # Fit the ARIMA model
+        model = ARIMA(y, order=(5, 1, 0))
+        model_fit = model.fit()
+
+        # Make predictions for the next 10 years
+        future_steps = 10
+        forecast = model_fit.forecast(steps=future_steps)
+
+        # Create a DataFrame for future predictions
+        future_years = np.arange(df['year'].max() + 1, df['year'].max() + 1 + future_steps)
+        future_df = pd.DataFrame({
+            'year': future_years,
+            'average_inflation': forecast
+        })
+
+        # Combine historical data with future predictions
+        combined_df = pd.concat([df, future_df])
+
+        return combined_df
+
+    def plot_arima(self, df, selected_country):
+        # Plot using the ARIMA model dataframe
+        combined_df = self.arima_model(df)
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(combined_df['year'], combined_df['average_inflation'], ls='--', color='#ff0000',
+                 label='Forecasted Inflation')
+        plt.plot(df['year'], df['average_inflation'], color='#00ffff', label='Historical Inflation')
+        plt.xlabel('Year', color='white')
+        plt.ylabel('Average Inflation', color='white')
+        plt.title(f'Inflation Forecast for {selected_country}', color='white')
+        plt.legend()
+        plt.grid(True, color='#c0c0c0', linewidth=0.1)
+
+        # Customize axis labels and ticks
+        ax = plt.gca()
+        ax.xaxis.label.set_color('white')
+        ax.yaxis.label.set_color('white')
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
+
+        # Set the background color to be transparent
+        plt.gca().set_facecolor('none')
+        plt.gcf().patch.set_facecolor('none')
+        # Plot the image
+        st.pyplot(plt)
+
+    def combined_forecast(self, df, selected_country):
+        combined_df_poly = self.regression_model(df)
+        combined_df_arima = self.arima_model(df)
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(combined_df_poly['year'], combined_df_poly['average_inflation'], ls='--', color='#ff0000',
+                 label='Polynomial Forecasted Inflation')
+        plt.plot(combined_df_arima['year'], combined_df_arima['average_inflation'], ls='--', color='#00ff00',
+                 label='ARIMA Forecasted Inflation')
         plt.plot(df['year'], df['average_inflation'], color='#00ffff', label='Historical Inflation')
         plt.xlabel('Year', color='white')
         plt.ylabel('Average Inflation', color='white')
@@ -217,7 +363,7 @@ class InflationApp:
         st.write(f"Probability: {selected_bin_probability2:.4f} or {100 * selected_bin_probability2:.2f}%")
 
         # Description for countries
-        st.write(":earth_americas: Next you can select a country and see the inflation values for each recorded year."
+        st.write(":earth_americas: Next you can select a country and see the inflation values for each recorded year. "
                  "The line plot shows how the inflation values developed over the years.")
 
         # Get list of countries for the selectbox
@@ -257,6 +403,17 @@ class InflationApp:
             # Run and plot regression model
             self.regression_model(df_reg)
             self.plot_regression(df_reg, selected_country)
+
+            # Run and plot polynomial model
+            self.regression_model_poly(df_reg)
+            self.plot_regression_poly(df_reg, selected_country)
+
+            # Run and plot ARIMA model
+            self.arima_model(df_reg)
+            self.plot_arima(df_reg, selected_country)
+
+            # Plot combined forecast
+            self.combined_forecast(df_reg, selected_country)
 
     def sidebar(self):
         st.sidebar.title("Navigation")
