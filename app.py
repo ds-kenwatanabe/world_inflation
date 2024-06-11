@@ -395,11 +395,12 @@ class InflationApp:
             st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
                           color=['#00ffff', '#ff0000'], use_container_width=True)
 
-            st.subheader("Predictive models")
-            st.write("Here you can see how one could implement models to predict future inflation values."
+            st.subheader(":chart_with_upwards_trend: Predictive models")
+            st.write("Here you can see how one could implement models to predict future inflation values. "
                      "There are three different models, pros and cons are shown for each one.\n"
-                     "These models should not be taken as finacial advise (and are probably imprecise), but have "
-                     "educational purpose, they could also serve as ideas on how to analyze your own data.")
+                     "These models should not be taken as financial advise (they are probably imprecise), "
+                     "but should be have an educational purpose, "
+                     "they could serve as ideas on how to analyze your own data.")
 
             # Run regression query
             reg_query = (f"SELECT year, average_inflation "
@@ -415,7 +416,7 @@ class InflationApp:
                      "understand, making it accessible for individuals without advanced statistical knowledge.\n"
                      "* The model provides a clear relationship between the year and inflation, "
                      "expressed as a linear equation. This makes it easy to explain and interpret "
-                     "the impact of time on inflation."
+                     "the impact of time on inflation.\n"
                      "* Requires minimal computational power and can be run on basic software tools.\n"
                      "\nCons:\n"
                      "* Linear Assumption - Inflation is influenced by numerous factors and might not follow "
@@ -474,17 +475,18 @@ class InflationApp:
                      "(the order of the autoregressive part). 𝑑 is the number of times the raw observations are "
                      "differenced to make the time series stationary (the order of differencing). "
                      "𝑞 is the size of the moving average window (the order of the moving average part).\n"
-                     "* The model used was a ARIMA(5, 1, 1). This means the model uses the previous 5 lagged values"
+                     "\nThe model used was a ARIMA(5, 1, 1). This means the model uses the previous 5 lagged values"
                      " (years) of the series to predict the current value.\n"
                      "The series is differenced once to achieve stationarity, "
                      "meaning that the model looks at the difference between consecutive observations rather "
                      "than the observations themselves.\n"
-                     "And the model includes one lagged forecast error in the model, due to probable "
+                     "And the model includes one lagged forecast error in the model, due to some probable "
                      "autocorrelation and partial autocorrelation. Economic time series data like inflation often "
-                     "exhibit autocorrelation due to economic cycles, monetary policies, and persistent shocks.\n"
-                     "However, ideally for every country the model would be evaluated to better "
-                     "determine p and q values.\n"
-                     "\nIn short:\n"
+                     "exhibit autocorrelation due to economic cycles, monetary policies, and persistent shocks, "
+                     "altough for most inflation data, we cannot call it stationary.\n"
+                     "Ideally there would be a model evaluation for every country to better "
+                     "determine if ARIMA is the best solution and determine p and q values.\n"
+                     "\nThe model in short:\n"
                      "\nARIMA(5, 1, 1) Model\n"
                      "* AR(5): The model uses the previous 5 values of the time series (lagged observations) "
                      "to predict the current value, accounting for longer-term dependencies.\n"
