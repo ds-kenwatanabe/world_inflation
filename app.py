@@ -234,7 +234,7 @@ class InflationApp:
 
     def display_inflation_data(self):
         # Streamlit UI
-        st.title("Countries CPI Inflation")
+        st.title(":earth_americas: World CPI Inflation")
 
         # Year picker
         selected_year = st.slider("Select a year", min_value=1956, max_value=2024, value=2024)
@@ -362,8 +362,10 @@ class InflationApp:
         st.write(f"Bin range: {selected_bin_start2:.2f} to {selected_bin_end2:.2f}")
         st.write(f"Probability: {selected_bin_probability2:.4f} or {100 * selected_bin_probability2:.2f}%")
 
+        st.title(":japan: Countries Average CPI Inflation")
+
         # Description for countries
-        st.write(":earth_americas: Next you can select a country and see the inflation values for each recorded year. "
+        st.write("Next you can select a country and see the inflation values for each recorded year. "
                  "The line plot shows how the inflation values developed over the years.")
 
         # Get list of countries for the selectbox
@@ -392,6 +394,12 @@ class InflationApp:
             # Create the line chart with both average and annual inflation
             st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
                           color=['#00ffff', '#ff0000'], use_container_width=True)
+
+            st.subheader("Predictive models")
+            st.write("Here you can see how one could implement models to predict future inflation values."
+                     "There are three different models, pros and cons are shown for each one.\n"
+                     "These models should not be taken as finacial advise (and are probably imprecise), but have "
+                     "educational purpose, they could also serve as ideas on how to analyze your own data.")
 
             # Run regression query
             reg_query = (f"SELECT year, average_inflation "
@@ -530,9 +538,9 @@ class InflationApp:
                     inflation rates across different countries.
 
                     **Features:**
-                    - View inflation data for a selected year.
+                    - View world inflation data for a selected year.
                     - Select a country to see CPI inflation data.
-                    - Forecast future inflation trends using linear regression.
+                    - Forecast future inflation trends.
 
                     Use the sidebar to navigate between different sections of the app.
                     """)
@@ -543,7 +551,10 @@ class InflationApp:
             st.header("References")
             st.markdown(":globe_with_meridians: [inflation.eu website](https://www.inflation.eu/en/)")
             st.markdown(":link: [About histograms](https://en.wikipedia.org/wiki/Histogram)")
-            st.markdown(":link: [Probability Density Function (PDF)](https://en.wikipedia.org/wiki/Histogram)")
+            st.markdown(":link: [Probability Density Function (PDF)]"
+                        "(https://en.wikipedia.org/wiki/Probability_density_function)")
+            st.markdown(":link: [Polynomial Regression](https://en.wikipedia.org/wiki/Polynomial_regression)")
+            st.markdown(":link: [ARIMA Models](https://www.ibm.com/topics/arima-model)")
 
     def ui(self):
         self.sidebar()
