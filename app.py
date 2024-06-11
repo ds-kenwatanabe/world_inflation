@@ -401,17 +401,98 @@ class InflationApp:
             reg_run_query = self.run_query(reg_query)
             df_reg = pd.DataFrame(reg_run_query)
             # Run and plot regression model
+            st.write("*Simple Linear Regression model*\n "
+                     "\nPros:\n"
+                     "* Simple linear regression is straightforward to implement and "
+                     "understand, making it accessible for individuals without advanced statistical knowledge.\n"
+                     "* The model provides a clear relationship between the year and inflation, "
+                     "expressed as a linear equation. This makes it easy to explain and interpret "
+                     "the impact of time on inflation."
+                     "* Requires minimal computational power and can be run on basic software tools.\n"
+                     "\nCons:\n"
+                     "* Linear Assumption - Inflation is influenced by numerous factors and might not follow "
+                     "a linear trend over time. Assuming a simple linear relationship "
+                     "can oversimplify the dynamics involved.\n"
+                     "* Real-world data often exhibit non-linear patterns. "
+                     "Simple linear regression fails to capture such complexities.\n"
+                     "* Lack of Explanatory Variables - Inflation is affected by multiple variables such as "
+                     "interest rates, monetary policy, supply and demand shocks, and geopolitical events. "
+                     "Using only the year as a predictor ignores these critical factors, reducing the model’s "
+                     "accuracy and reliability.\n"
+                     "* Temporal Correlation vs. Causation - A linear regression model with year as the predictor "
+                     "only shows correlation over time, not causation. It cannot explain why inflation changes, "
+                     "merely that it has changed over time.\n"
+                     "* The model may either overfit or underfit the data, leading to poor predictive performance.")
             self.regression_model(df_reg)
             self.plot_regression(df_reg, selected_country)
+
+            st.write("*Polynomial Regression model*\n"
+                     "\nPolynomial regression is an extension of linear regression where the relationship between "
+                     "the independent variable 𝑋 and the dependent variable 𝑦 is modeled as an 𝑛-degree polynomial. "
+                     "Instead of fitting a straight line to the data, polynomial regression fits a curve.\n"
+                     "Since the model is quite simple, there are only two variables present, "
+                     "there might no be much variation between this model and the Linear Regression model. "
+                     "A degree of 3 was used, this is called a cubic model, allowing for more complex curves "
+                     "with potential inflection points.\n"
+                     "\nPros:\n"
+                     "* This model can be more flexible, modelling non-linear relationships "
+                     "by adding polynomial terms. It is also easy to understand and implement, "
+                     "especially with existing linear regression tools.\n"
+                     "* Better Fit - Potentially provides a better fit for data that is "
+                     "not well-represented by a straight line.\n"
+                     "\nCons:\n"
+                     "* Overfitting - Higher-degree polynomials can overfit the data, capturing noise rather "
+                     "than the underlying trend.\n"
+                     "* Extrapolation Risk - Predictions outside the range of the data can be unreliable and extreme.")
 
             # Run and plot polynomial model
             self.regression_model_poly(df_reg)
             self.plot_regression_poly(df_reg, selected_country)
 
+            st.write("*ARIMA (AutoRegressive Integrated Moving Average)*\n"
+                     "\nARIMA is a time series forecasting method that combines three components: AutoRegressive (AR), "
+                     "Integrated (I), and Moving Average (MA). "
+                     "It is used for analyzing and forecasting time series data that may have autocorrelations, "
+                     "trends, and seasonality.\n"
+                     "* AR (AutoRegressive): The model uses the dependency between an observation and a number of "
+                     "lagged observations (previous values).\n"
+                     "* I (Integrated): The model uses differencing of observations "
+                     "(subtracting an observation from an observation at the previous time step) "
+                     "to make the time series stationary.\n"
+                     "* MA (Moving Average): The model uses dependency between an observation and a residual error "
+                     "from a moving average model applied to lagged observations.\n"
+                     "\nIn the context of ARIMA models, the order is denoted as ARIMA(p, d, q), "
+                     "where: 𝑝 is the number of lag observations included in the model "
+                     "(the order of the autoregressive part). 𝑑 is the number of times the raw observations are "
+                     "differenced to make the time series stationary (the order of differencing). "
+                     "𝑞 is the size of the moving average window (the order of the moving average part).\n"
+                     "* The model used was a ARIMA(5, 1, 0). This means the model uses the previous 5 lagged values"
+                     "(years) of the series to predict the current value.\n"
+                     "The series is differenced once to achieve stationarity, "
+                     "meaning that the model looks at the difference between consecutive observations rather "
+                     "than the observations themselves.\n"
+                     "And the model includes lagged forecast errors in the model, due to probable "
+                     "autocorrelation and partial autocorrelation.\n"
+                     "Ideally, for every country the model would be evaluated to better determine p and q values.\n"
+                     "\nPros:\n"
+                     "* Captures Temporal Dependencies - Effectively models time series data "
+                     "with trends and seasonality.\n"
+                     "* Flexibility - Can handle different types of time series data through differencing "
+                     "and the combination of AR and MA components.\n"
+                     "* Forecast Accuracy - Often provides accurate forecasts for time series data.\n"
+                     "\nCons:\n"
+                     "* Complexity - Requires understanding and tuning of multiple parameters (p, d, q), "
+                     "which can be complex.\n"
+                     "* Data Preprocessing - Needs data to be stationary, which requires preprocessing "
+                     "such as differencing.\n"
+                     "More Computationally Intensive - Can be computationally intensive, especially with "
+                     "large datasets or complex models.")
+
             # Run and plot ARIMA model
             self.arima_model(df_reg)
             self.plot_arima(df_reg, selected_country)
 
+            st.write("Finally, in this plot you can see how the Polynomial and the ARIMA model compare.")
             # Plot combined forecast
             self.combined_forecast(df_reg, selected_country)
 
