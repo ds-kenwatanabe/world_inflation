@@ -528,7 +528,7 @@ class InflationApp:
                     
                     Data was scrapped from the [inflation.eu](https://www.inflation.eu/) website 
                     and stored in a MySQL database. 
-                    You can check the code in the [GitHub repo]().
+                    You can check the code in the [GitHub repo](https://github.com/ds-kenwatanabe/world_inflation).
                     
                     **What is CPI?**
                     
@@ -558,7 +558,7 @@ class InflationApp:
         elif selection == "References":
             st.header("References")
             st.markdown(":globe_with_meridians: [inflation.eu website](https://www.inflation.eu/en/)")
-            st.markdown(":file_folder: [GitHub repo](https://www.inflation.eu/en/)")
+            st.markdown(":file_folder: [GitHub repo](https://github.com/ds-kenwatanabe/world_inflation)")
             st.markdown(":link: [About histograms](https://en.wikipedia.org/wiki/Histogram)")
             st.markdown(":link: [Probability Density Function (PDF)]"
                         "(https://en.wikipedia.org/wiki/Probability_density_function)")
