@@ -525,7 +525,13 @@ class InflationApp:
             st.write("""
                     This application provides an overview and analysis of inflation data across different countries 
                     using the consumer price index (CPI).
-
+                    
+                    Data was scrapped from the [inflation.eu](https://www.inflation.eu/) website 
+                    and stored in a MySQL database. 
+                    You can check the code in the [GitHub repo]().
+                    
+                    **What is CPI?**
+                    
                     A consumer price index (CPI) measures the average change in prices over time for a basket of 
                     consumer goods and services commonly purchased by households. 
 
@@ -552,11 +558,14 @@ class InflationApp:
         elif selection == "References":
             st.header("References")
             st.markdown(":globe_with_meridians: [inflation.eu website](https://www.inflation.eu/en/)")
+            st.markdown(":file_folder: [GitHub repo](https://www.inflation.eu/en/)")
             st.markdown(":link: [About histograms](https://en.wikipedia.org/wiki/Histogram)")
             st.markdown(":link: [Probability Density Function (PDF)]"
                         "(https://en.wikipedia.org/wiki/Probability_density_function)")
             st.markdown(":link: [Polynomial Regression](https://en.wikipedia.org/wiki/Polynomial_regression)")
             st.markdown(":link: [ARIMA Models](https://www.ibm.com/topics/arima-model)")
+            st.markdown(":link: [Guide to Time Series Forecasting Models](https://medium.com/"
+                        "@wainaina.pierre/the-complete-guide-to-time-series-forecasting-models-ef9c8cd40037)")
 
     def ui(self):
         self.sidebar()
