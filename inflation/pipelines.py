@@ -3,16 +3,26 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
-
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-import mysql.connector
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 
 class InflationPipeline:
     def process_item(self, item, spider):
         # Initialize adapter
         adapter = ItemAdapter(item)
+
+        # Convert year to int
+        year = adapter.get('year')
+        if year is not None:
+            try:
+                adapter['year'] = int(year)
+            except ValueError:
+                print(f"{year} could not be converted to int.")
+                adapter['year'] = None
+
         # Substitute unavailable values ('-' and 'nan') and convert to float
         inflation_keys = ['annual_inflation', 'average_inflation']
         for key in inflation_keys:
@@ -35,41 +45,17 @@ class InflationPipeline:
         return item
 
 
-class SaveToMySQLPipeline:
+class SaveToFirebasePipeline:
     def __init__(self):
-        self.conn = None
-        self.cur = None
-        self.open_connection()
+        self.db = None
+        self.initialize_firebase()
 
-    def open_connection(self):
-        try:
-            self.conn = mysql.connector.connect(
-                host='localhost',
-                user='root',
-                password='',  # Add your password
-                database='inflation'
-            )
-            self.cur = self.conn.cursor()
-            self.create_table()
-        except mysql.connector.Error as err:
-            print(f"Error with MySQL connector: {err}")
-
-    def create_table(self):
-        try:
-            self.cur.execute(
-                '''
-                CREATE TABLE IF NOT EXISTS inflation(
-                id INTEGER NOT NULL AUTO_INCREMENT,
-                country VARCHAR(255),
-                year YEAR,
-                average_inflation DECIMAL(10, 2),
-                annual_inflation DECIMAL(10, 2),
-                PRIMARY KEY (id)
-                )
-                '''
-            )
-        except mysql.connector.Error as err:
-            print(f"Error creating table: {err}")
+    def initialize_firebase(self):
+        # Use a service account
+        cred = credentials.Certificate("/home/chris/PycharmProjects/world_inflation/inflation/"
+                                       "inflation-9a2aa-firebase-adminsdk-1ne09-7a5cd5cd36.json")
+        firebase_admin.initialize_app(cred)
+        self.db = firestore.client()
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
@@ -78,33 +64,25 @@ class SaveToMySQLPipeline:
         average_inflation = adapter.get('average_inflation')
         annual_inflation = adapter.get('annual_inflation')
 
-        # Check if the item already exists
-        self.cur.execute(
-            '''SELECT id FROM inflation WHERE country = %s AND year = %s''',
-            (country, year)
-        )
-        result = self.cur.fetchone()
+        doc_ref = self.db.collection('inflation').document(f"{country}_{year}")
+        doc = doc_ref.get()
 
-        if result:
+        if doc.exists:
             print(f"Item already exists: {country} {year}")
         else:
             try:
-                self.cur.execute(
-                    '''
-                    INSERT INTO inflation (
-                        country,
-                        year,
-                        average_inflation,
-                        annual_inflation
-                    ) VALUES (%s, %s, %s, %s)
-                    ''', (country, year, average_inflation, annual_inflation)
-                )
-                self.conn.commit()
-            except mysql.connector.Error as err:
-                print(f"Error inserting item: {err}")
+                doc_ref.set({
+                    'country': country,
+                    'year': year,
+                    'average_inflation': average_inflation,
+                    'annual_inflation': annual_inflation
+                })
+                print(f"Item saved: {country} {year}")
+            except Exception as e:
+                print(f"Error inserting item: {e}")
 
-            return item
+        return item
 
     def close_spider(self, spider):
-        self.cur.close()
-        self.conn.close()
+        # No explicit closing required for Firebase connections
+        pass

@@ -69,7 +69,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "inflation.pipelines.InflationPipeline": 300,
-    "inflation.pipelines.SaveToMySQLPipeline": 400,
+    "inflation.pipelines.SaveToFirebasePipeline": 400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
