@@ -1,5 +1,6 @@
 import streamlit as st
-import mysql.connector
+import firebase_admin
+from firebase_admin import credentials, firestore
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,33 +8,32 @@ from matplotlib.ticker import MaxNLocator
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from statsmodels.tsa.arima.model import ARIMA
+from secret_path import secret_path
 
 
 class InflationApp:
-    # Function to establish a connection to the MySQL database using secrets
-    def get_connection(self):
-        conn = mysql.connector.connect(
-            host=st.secrets["mysql"]["host"],
-            user=st.secrets["mysql"]["username"],
-            password=st.secrets["mysql"]["password"],
-            database=st.secrets["mysql"]["database"]
-        )
-        return conn
+    def __init__(self):
+        # Initialize Firebase
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(secret_path())
+            firebase_admin.initialize_app(cred)
+        self.db = firestore.client()
 
-    # Function to query the database
-    def run_query(self, query):
-        conn = self.get_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(query)
-        result = cursor.fetchall()
-        conn.close()
+    # Function to query the Firestore database
+    def run_query(self, collection_name, filters=None):
+        collection_ref = self.db.collection(collection_name)
+        if filters:
+            for filter in filters:
+                collection_ref = collection_ref.where(*filter)
+        docs = collection_ref.stream()
+        result = [doc.to_dict() for doc in docs]
         return result
 
     # Function to get the list of countries
     def get_countries(self):
-        query = "SELECT DISTINCT country FROM inflation;"
-        result = self.run_query(query)
-        return [row['country'] for row in result]
+        result = self.run_query('inflation')
+        countries = {row['country'] for row in result if row['country'] is not None}
+        return list(countries)
 
     def regression_model(self, df):
         # Drop None values
@@ -246,7 +246,7 @@ class InflationApp:
                      f"ORDER BY average_inflation DESC;")
 
         # Display all users from the database
-        inflation = self.run_query(sql_query)
+        inflation = self.run_query('inflation', filters=[('year', '==', selected_year)])
 
         # Convert the result into a DataFrame for easier handling
         df = pd.DataFrame(inflation)
@@ -373,20 +373,9 @@ class InflationApp:
         selected_country = st.selectbox("Select a country", countries)
 
         if selected_country:
-            # Update the query to filter by the selected country
-            line_query = (f"SELECT year, average_inflation, annual_inflation "
-                          f"FROM inflation "
-                          f"WHERE country = '{selected_country}' "
-                          f"ORDER BY year;")
-
             # Display data for the selected country
-            inflation_line = self.run_query(line_query)
+            inflation_line = self.run_query('inflation', filters=[('country', '==', selected_country)])
             df_line = pd.DataFrame(inflation_line)
-
-            # Ensure numeric columns are correctly typed
-            df_line['year'] = pd.to_numeric(df_line['year'], errors='coerce')
-            df_line['average_inflation'] = pd.to_numeric(df_line['average_inflation'], errors='coerce')
-            df_line['annual_inflation'] = pd.to_numeric(df_line['annual_inflation'], errors='coerce')
 
             st.subheader(f"Inflation Data for {selected_country}")
             st.write(df_line)
@@ -402,13 +391,6 @@ class InflationApp:
                      "but should be have an educational purpose, "
                      "they could serve as ideas on how to analyze your own data.")
 
-            # Run regression query
-            reg_query = (f"SELECT year, average_inflation "
-                         f"FROM inflation "
-                         f"WHERE country = '{selected_country}' "
-                         f"ORDER BY year;")
-            reg_run_query = self.run_query(reg_query)
-            df_reg = pd.DataFrame(reg_run_query)
             # Run and plot regression model
             st.write("*Simple Linear Regression model*\n "
                      "\nPros:\n"
@@ -432,8 +414,8 @@ class InflationApp:
                      "only shows correlation over time, not causation. It cannot explain why inflation changes, "
                      "merely that it has changed over time.\n"
                      "* The model may either overfit or underfit the data, leading to poor predictive performance.")
-            self.regression_model(df_reg)
-            self.plot_regression(df_reg, selected_country)
+            self.regression_model(df_line)
+            self.plot_regression(df_line, selected_country)
 
             st.write("*Polynomial Regression model*\n"
                      "\nPolynomial regression is an extension of linear regression where the relationship between "
@@ -455,8 +437,8 @@ class InflationApp:
                      "* Extrapolation Risk - Predictions outside the range of the data can be unreliable and extreme.")
 
             # Run and plot polynomial model
-            self.regression_model_poly(df_reg)
-            self.plot_regression_poly(df_reg, selected_country)
+            self.regression_model_poly(df_line)
+            self.plot_regression_poly(df_line, selected_country)
 
             st.write("*ARIMA (AutoRegressive Integrated Moving Average)*\n"
                      "\nARIMA is a time series forecasting method that combines three components: AutoRegressive (AR), "
@@ -508,12 +490,12 @@ class InflationApp:
                      "large datasets or complex models.")
 
             # Run and plot ARIMA model
-            self.arima_model(df_reg)
-            self.plot_arima(df_reg, selected_country)
+            self.arima_model(df_line)
+            self.plot_arima(df_line, selected_country)
 
             st.write("Finally, in this plot you can see how the Polynomial and the ARIMA model compare.")
             # Plot combined forecast
-            self.combined_forecast(df_reg, selected_country)
+            self.combined_forecast(df_line, selected_country)
 
     def sidebar(self):
         st.sidebar.title("Navigation")
@@ -573,5 +555,4 @@ class InflationApp:
 
 if __name__ == '__main__':
     app = InflationApp()
-    app.get_connection()
     app.ui()
