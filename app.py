@@ -239,21 +239,11 @@ class InflationApp:
         # Year picker
         selected_year = st.slider("Select a year", min_value=1956, max_value=2024, value=2024)
 
-        # Update the query to filter by the selected year
-        sql_query = (f"SELECT country, year, average_inflation, annual_inflation "
-                     f"FROM inflation "
-                     f"WHERE year = {selected_year} "
-                     f"ORDER BY average_inflation DESC;")
-
         # Display all users from the database
         inflation = self.run_query('inflation', filters=[('year', '==', selected_year)])
 
         # Convert the result into a DataFrame for easier handling
         df = pd.DataFrame(inflation)
-
-        # Ensure numeric columns are correctly typed
-        df['average_inflation'] = pd.to_numeric(df['average_inflation'], errors='coerce')
-        df['annual_inflation'] = pd.to_numeric(df['annual_inflation'], errors='coerce')
 
         st.subheader(f"Inflation Data for {selected_year}")
         st.write(df)
