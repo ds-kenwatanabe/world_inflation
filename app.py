@@ -46,8 +46,6 @@ class InflationApp:
         return list(countries)
 
     def regression_model(self, df):
-        # Drop None values
-        df = df.dropna()
         # set variables
         X = df[['year']]
         y = df['average_inflation']
@@ -99,8 +97,6 @@ class InflationApp:
         st.pyplot(plt)
 
     def regression_model_poly(self, df):
-        # Drop None values
-        df = df.dropna()
         # Set variables
         X = df[['year']]
         y = df['average_inflation']
@@ -157,9 +153,6 @@ class InflationApp:
         st.pyplot(plt)
 
     def arima_model(self, df):
-        # Drop None values
-        df = df.dropna()
-
         # Ensure 'average_inflation' is numeric
         df['average_inflation'] = pd.to_numeric(df['average_inflation'], errors='coerce')
         df = df.dropna(subset=['average_inflation'])
