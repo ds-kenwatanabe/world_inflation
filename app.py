@@ -8,14 +8,24 @@ from matplotlib.ticker import MaxNLocator
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from statsmodels.tsa.arima.model import ARIMA
-from secret_path import secret_path
 
 
 class InflationApp:
     def __init__(self):
         # Initialize Firebase
         if not firebase_admin._apps:
-            cred = credentials.Certificate(secret_path())
+            cred = credentials.Certificate({
+                "type": st.secrets["firebase"]["type"],
+                "project_id": st.secrets["firebase"]["project_id"],
+                "private_key_id": st.secrets["firebase"]["private_key_id"],
+                "private_key": st.secrets["firebase"]["private_key"].replace("\\n", "\n"),
+                "client_email": st.secrets["firebase"]["client_email"],
+                "client_id": st.secrets["firebase"]["client_id"],
+                "auth_uri": st.secrets["firebase"]["auth_uri"],
+                "token_uri": st.secrets["firebase"]["token_uri"],
+                "auth_provider_x509_cert_url": st.secrets["firebase"]["auth_provider_x509_cert_url"],
+                "client_x509_cert_url": st.secrets["firebase"]["client_x509_cert_url"]
+            })
             firebase_admin.initialize_app(cred)
         self.db = firestore.client()
 
@@ -320,7 +330,8 @@ class InflationApp:
         # Drop None values, current year not available
         df_annual_inflation = df['annual_inflation'].dropna()
 
-        counts2, bins2, patches2 = plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black', density=True, stacked=True)
+        counts2, bins2, patches2 = plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black', density=True,
+                                            stacked=True)
 
         # Set ax colors and labels
         ax2.set_xlabel('Inflation Percentage', color='white')
