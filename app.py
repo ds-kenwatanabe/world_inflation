@@ -528,7 +528,7 @@ class InflationApp:
 
                     Use the sidebar to navigate between different sections of the app.
                     """)
-            st.image("/home/chris/Pictures/inflation/00044-1625230760.png")
+            st.image("images/00044-1625230760.png")
         elif selection == "Inflation Data":
             self.display_inflation_data()
         elif selection == "References":
