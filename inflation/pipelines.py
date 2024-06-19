@@ -52,8 +52,7 @@ class SaveToFirebasePipeline:
 
     def initialize_firebase(self):
         # Use a service account
-        cred = credentials.Certificate("/home/chris/PycharmProjects/world_inflation/inflation/"
-                                       "inflation-9a2aa-firebase-adminsdk-1ne09-7a5cd5cd36.json")
+        cred = credentials.Certificate("path_to_credential")
         firebase_admin.initialize_app(cred)
         self.db = firestore.client()
 
@@ -82,7 +81,3 @@ class SaveToFirebasePipeline:
                 print(f"Error inserting item: {e}")
 
         return item
-
-    def close_spider(self, spider):
-        # No explicit closing required for Firebase connections
-        pass
