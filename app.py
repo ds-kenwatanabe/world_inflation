@@ -238,12 +238,11 @@ class InflationApp:
         # Display all users from the database
         result = self.run_query('inflation', year=selected_year).data
 
-
         # Convert the result into a DataFrame for easier handling
         df = pd.DataFrame(result)
 
         st.subheader(f"Inflation Data for {selected_year}")
-        st.write(df)
+        st.write(df[['year', 'country', 'average_inflation', 'annual_inflation']])
 
         # Summary statistics
         st.subheader(f"Summary Statistics for {selected_year}")
@@ -366,7 +365,7 @@ class InflationApp:
             df_line = pd.DataFrame(inflation_line)
             df_line.sort_values(by='year', inplace=True)
             st.subheader(f"Inflation Data for {selected_country}")
-            st.write(df_line)
+            st.write(df_line[['year', 'country', 'average_inflation', 'annual_inflation']])
 
             # Create the line chart with both average and annual inflation
             st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
