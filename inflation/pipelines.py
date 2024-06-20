@@ -1,12 +1,7 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-# useful for handling different item types with a single interface
+import os
+from dotenv import load_dotenv
+from supabase import create_client
 from itemadapter import ItemAdapter
-import firebase_admin
-from firebase_admin import credentials, firestore
 
 
 class InflationPipeline:
@@ -45,16 +40,22 @@ class InflationPipeline:
         return item
 
 
-class SaveToFirebasePipeline:
+class SaveToSupabasePipeline:
     def __init__(self):
-        self.db = None
-        self.initialize_firebase()
+        self.client = None
+        self.load_environment_variables()
+        self.initialize_supabase()
 
-    def initialize_firebase(self):
-        # Use a service account
-        cred = credentials.Certificate("path_to_credential")
-        firebase_admin.initialize_app(cred)
-        self.db = firestore.client()
+    def load_environment_variables(self):
+        # Load environment variables from .env file
+        load_dotenv()
+
+    def initialize_supabase(self):
+        url = os.getenv('SUPABASE_URL')
+        key = os.getenv('SUPABASE_KEY')
+        if not url or not key:
+            raise ValueError("Supabase URL and Key must be set in environment variables")
+        self.client = create_client(url, key)
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
@@ -63,21 +64,23 @@ class SaveToFirebasePipeline:
         average_inflation = adapter.get('average_inflation')
         annual_inflation = adapter.get('annual_inflation')
 
-        doc_ref = self.db.collection('inflation').document(f"{country}_{year}")
-        doc = doc_ref.get()
+        try:
+            # Check if the item already exists in the database
+            response = self.client.table('inflation').select('*').eq('country', country).eq('year', year).execute()
 
-        if doc.exists:
-            print(f"Item already exists: {country} {year}")
-        else:
-            try:
-                doc_ref.set({
+            if response.data:
+                print(f"Item already exists: {country} {year}")
+            else:
+                # Insert the item into the database
+                self.client.table('inflation').insert({
                     'country': country,
                     'year': year,
                     'average_inflation': average_inflation,
                     'annual_inflation': annual_inflation
-                })
+                }).execute()
                 print(f"Item saved: {country} {year}")
-            except Exception as e:
-                print(f"Error inserting item: {e}")
+
+        except Exception as e:
+            print(f"Error processing item: {e}")
 
         return item
