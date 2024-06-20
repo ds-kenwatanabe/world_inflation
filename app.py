@@ -304,50 +304,55 @@ class InflationApp:
         st.write(f"Bin range: {selected_bin_start:.2f} to {selected_bin_end:.2f}")
         st.write(f"Probability: {selected_bin_probability:.4f} or {100 * selected_bin_probability:.2f}%")
 
-        # Determine min and max inflation values
-        min_annual_inflation = df['annual_inflation'].min()
-        max_annual_inflation = df['annual_inflation'].max()
+        if not df['annual_inflation'].isnull().all():
+            # Determine min and max inflation values
+            min_annual_inflation = df['annual_inflation'].min()
+            max_annual_inflation = df['annual_inflation'].max()
 
-        # Calculate the bin width
-        bin_width_annual = (max_annual_inflation - min_annual_inflation) / 100
+            # Calculate the bin width
+            bin_width_annual = (max_annual_inflation - min_annual_inflation) / 100
 
-        st.subheader(f"Normalized Annual Inflation Distribution for {selected_year} (dec vs. dec)")
-        fig2, ax2 = plt.subplots()
-        # Drop None values, current year not available
-        df_annual_inflation = df['annual_inflation'].dropna()
+            st.subheader(f"Normalized Annual Inflation Distribution for {selected_year} (dec vs. dec)")
+            fig2, ax2 = plt.subplots()
+            # Drop None values if any
+            df_annual_inflation = df['annual_inflation'].dropna()
 
-        counts2, bins2, patches2 = plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black', density=True,
-                                            stacked=True)
+            counts2, bins2, patches2 = plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black', density=True,
+                                                stacked=True)
 
-        # Set ax colors and labels
-        ax2.set_xlabel('Inflation Percentage', color='white')
-        ax2.set_ylabel('Probability Density', color='white')
-        ax2.xaxis.label.set_color('white')
-        ax2.yaxis.label.set_color('white')
-        ax2.tick_params(axis='x', colors='white')
-        ax2.tick_params(axis='y', colors='white')
+            # Set ax colors and labels
+            ax2.set_xlabel('Inflation Percentage', color='white')
+            ax2.set_ylabel('Probability Density', color='white')
+            ax2.xaxis.label.set_color('white')
+            ax2.yaxis.label.set_color('white')
+            ax2.tick_params(axis='x', colors='white')
+            ax2.tick_params(axis='y', colors='white')
 
-        # Set x-axis ticks
-        ax2.xaxis.set_major_locator(MaxNLocator(nbins=15))
+            # Set x-axis ticks
+            ax2.xaxis.set_major_locator(MaxNLocator(nbins=15))
 
-        # Set the background color to be transparent
-        plt.gca().set_facecolor('none')
-        plt.gcf().patch.set_facecolor('none')
-        st.pyplot(fig2)
+            # Set the background color to be transparent
+            plt.gca().set_facecolor('none')
+            plt.gcf().patch.set_facecolor('none')
+            st.pyplot(fig2)
 
-        # Bin selection slider
-        st.subheader("Select a bin to see the probability")
-        selected_bin2 = st.slider("Select bin for the annual inflation", 0, 99, 0)
+            # Bin selection slider
+            st.subheader("Select a bin to see the probability")
+            selected_bin2 = st.slider("Select bin for the annual inflation", 0, 99, 0)
 
-        # Calculate the probability for the selected bin
-        selected_density2 = counts2[selected_bin2]
-        selected_bin_start2 = bins2[selected_bin2]
-        selected_bin_end2 = bins2[selected_bin2 + 1]
-        selected_bin_probability2 = selected_density2 * bin_width_annual
+            # Calculate the probability for the selected bin
+            selected_density2 = counts2[selected_bin2]
+            selected_bin_start2 = bins2[selected_bin2]
+            selected_bin_end2 = bins2[selected_bin2 + 1]
+            selected_bin_probability2 = selected_density2 * bin_width_annual
 
-        st.write(f"Selected bin: {selected_bin2}")
-        st.write(f"Bin range: {selected_bin_start2:.2f} to {selected_bin_end2:.2f}")
-        st.write(f"Probability: {selected_bin_probability2:.4f} or {100 * selected_bin_probability2:.2f}%")
+            st.write(f"Selected bin: {selected_bin2}")
+            st.write(f"Bin range: {selected_bin_start2:.2f} to {selected_bin_end2:.2f}")
+            st.write(f"Probability: {selected_bin_probability2:.4f} or {100 * selected_bin_probability2:.2f}%")
+
+        else:
+            st.write(":heavy_exclamation_mark: :red[Annual inflation is not displayed since the data "
+                     "compares the inflation for December last year and December for the current year.]")
 
         st.title(":japan: Countries Average CPI Inflation")
 
