@@ -372,6 +372,10 @@ class InflationApp:
             st.subheader(f"Inflation Data for {selected_country}")
             st.write(df_line[['year', 'country', 'average_inflation', 'annual_inflation']])
 
+            # Summary statistics for country
+            st.subheader(f"Summary Statistics for {selected_country}")
+            st.write(df_line["average_inflation"].describe())
+
             # Create the line chart with both average and annual inflation
             st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
                           color=['#00ffff', '#ff0000'], use_container_width=True)
