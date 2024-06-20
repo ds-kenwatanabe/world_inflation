@@ -1,9 +1,8 @@
 import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, firestore
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from supabase import create_client, Client
 from matplotlib.ticker import MaxNLocator
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
@@ -12,40 +11,30 @@ from statsmodels.tsa.arima.model import ARIMA
 
 class InflationApp:
     def __init__(self):
-        # Initialize Firebase
-        if not firebase_admin._apps:
-            cred = credentials.Certificate({
-                "type": st.secrets["firebase"]["type"],
-                "project_id": st.secrets["firebase"]["project_id"],
-                "private_key_id": st.secrets["firebase"]["private_key_id"],
-                "private_key": st.secrets["firebase"]["private_key"].replace("\\n", "\n"),
-                "client_email": st.secrets["firebase"]["client_email"],
-                "client_id": st.secrets["firebase"]["client_id"],
-                "auth_uri": st.secrets["firebase"]["auth_uri"],
-                "token_uri": st.secrets["firebase"]["token_uri"],
-                "auth_provider_x509_cert_url": st.secrets["firebase"]["auth_provider_x509_cert_url"],
-                "client_x509_cert_url": st.secrets["firebase"]["client_x509_cert_url"]
-            })
-            firebase_admin.initialize_app(cred)
-        self.db = firestore.client()
+        url = st.secrets["connections"]["supabase"]["SUPABASE_URL"]
+        key = st.secrets["connections"]["supabase"]["SUPABASE_KEY"]
+        self.db: Client = create_client(url, key)
 
-    # Function to query the Firestore database
-    def run_query(self, collection_name, filters=None):
-        collection_ref = self.db.collection(collection_name)
-        if filters:
-            for filter in filters:
-                collection_ref = collection_ref.where(*filter)
-        docs = collection_ref.stream()
-        result = [doc.to_dict() for doc in docs]
-        return result
+    # Function to query the Supabase database
+    # Only rerun when the query changes or after 10 minutes.
+    def run_query(self, table_name, **kwargs):
+        query = self.db.table(table_name).select('*')
+        for key, value in kwargs.items():
+            query = query.eq(key, value)
+        return query.execute()
 
     # Function to get the list of countries
     def get_countries(self):
-        result = self.run_query('inflation')
-        countries = {row['country'] for row in result if row['country'] is not None}
-        return list(countries)
+        result = self.run_query('inflation').data
+
+        # Extract country names from the result
+        countries = sorted(set(item['country'] for item in result))
+        countries.sort()  # Sort countries alphabetically
+        return countries
 
     def regression_model(self, df):
+        df = df[['year', 'average_inflation']]
+        df = df.dropna()
         # set variables
         X = df[['year']]
         y = df['average_inflation']
@@ -97,6 +86,8 @@ class InflationApp:
         st.pyplot(plt)
 
     def regression_model_poly(self, df):
+        df = df[['year', 'average_inflation']]
+        df = df.dropna()
         # Set variables
         X = df[['year']]
         y = df['average_inflation']
@@ -153,6 +144,8 @@ class InflationApp:
         st.pyplot(plt)
 
     def arima_model(self, df):
+        df = df[['year', 'average_inflation']]
+        df = df.dropna()
         # Ensure 'average_inflation' is numeric
         df['average_inflation'] = pd.to_numeric(df['average_inflation'], errors='coerce')
         df = df.dropna(subset=['average_inflation'])
@@ -243,10 +236,11 @@ class InflationApp:
         selected_year = st.slider("Select a year", min_value=1956, max_value=2024, value=2024)
 
         # Display all users from the database
-        inflation = self.run_query('inflation', filters=[('year', '==', selected_year)])
+        result = self.run_query('inflation', year=selected_year).data
+
 
         # Convert the result into a DataFrame for easier handling
-        df = pd.DataFrame(inflation)
+        df = pd.DataFrame(result)
 
         st.subheader(f"Inflation Data for {selected_year}")
         st.write(df)
@@ -368,9 +362,9 @@ class InflationApp:
 
         if selected_country:
             # Display data for the selected country
-            inflation_line = self.run_query('inflation', filters=[('country', '==', selected_country)])
+            inflation_line = self.run_query('inflation', country=selected_country).data
             df_line = pd.DataFrame(inflation_line)
-
+            df_line.sort_values(by='year', inplace=True)
             st.subheader(f"Inflation Data for {selected_country}")
             st.write(df_line)
 
