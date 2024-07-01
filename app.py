@@ -521,7 +521,8 @@ class InflationApp:
                     using the consumer price index (CPI).
                     
                     Data was scrapped from the [inflation.eu](https://www.inflation.eu/) website 
-                    and stored in a MySQL database. 
+                    and stored in a [Supabase](https://supabase.com/) database.
+                     
                     You can check the code in the [GitHub repo](https://github.com/ds-kenwatanabe/world_inflation).
                     
                     **What is CPI?**
