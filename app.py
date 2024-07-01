@@ -240,17 +240,24 @@ class InflationApp:
 
         # Convert the result into a DataFrame for easier handling
         df = pd.DataFrame(result)
+        # Rename columns
+        df = df.rename(columns={
+            'year': 'Year',
+            'country': 'Country',
+            'average_inflation': 'Average Inflation',
+            'annual_inflation': 'Annual Inflation'
+        })
 
         st.subheader(f"Inflation Data for {selected_year}")
-        st.write(df[['year', 'country', 'average_inflation', 'annual_inflation']])
+        st.write(df[['Year', 'Country', 'Average Inflation', 'Annual Inflation']])
 
         # Summary statistics
         st.subheader(f"Summary Statistics for {selected_year}")
-        st.write(df[["average_inflation", "annual_inflation"]].describe())
+        st.write(df[["Average Inflation", "Annual Inflation"]].describe())
 
         # Determine min and max inflation values
-        min_inflation = df['average_inflation'].min()
-        max_inflation = df['average_inflation'].max()
+        min_inflation = df['Average Inflation'].min()
+        max_inflation = df['Average Inflation'].max()
 
         # Calculate the bin width
         bin_width = (max_inflation - min_inflation) / 100
@@ -258,7 +265,7 @@ class InflationApp:
         # Histogram for distribution
         st.subheader(f"Normalized Average Inflation Distribution for {selected_year}")
         fig, ax = plt.subplots()
-        counts, bins, patches = plt.hist(df['average_inflation'], bins=100, color='cyan', edgecolor='black',
+        counts, bins, patches = plt.hist(df['Average Inflation'], bins=100, color='cyan', edgecolor='black',
                                          density=True, stacked=True)
 
         # Set ax colors and labels
@@ -304,10 +311,10 @@ class InflationApp:
         st.write(f"Bin range: {selected_bin_start:.2f} to {selected_bin_end:.2f}")
         st.write(f"Probability: {selected_bin_probability:.4f} or {100 * selected_bin_probability:.2f}%")
 
-        if not df['annual_inflation'].isnull().all():
+        if not df['Annual Inflation'].isnull().all():
             # Determine min and max inflation values
-            min_annual_inflation = df['annual_inflation'].min()
-            max_annual_inflation = df['annual_inflation'].max()
+            min_annual_inflation = df['Annual Inflation'].min()
+            max_annual_inflation = df['Annual Inflation'].max()
 
             # Calculate the bin width
             bin_width_annual = (max_annual_inflation - min_annual_inflation) / 100
@@ -315,9 +322,10 @@ class InflationApp:
             st.subheader(f"Normalized Annual Inflation Distribution for {selected_year} (dec vs. dec)")
             fig2, ax2 = plt.subplots()
             # Drop None values if any
-            df_annual_inflation = df['annual_inflation'].dropna()
+            df_annual_inflation = df['Annual Inflation'].dropna()
 
-            counts2, bins2, patches2 = plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black', density=True,
+            counts2, bins2, patches2 = plt.hist(df_annual_inflation, bins=100, color='red', edgecolor='black',
+                                                density=True,
                                                 stacked=True)
 
             # Set ax colors and labels
@@ -368,16 +376,23 @@ class InflationApp:
             # Display data for the selected country
             inflation_line = self.run_query('inflation', country=selected_country).data
             df_line = pd.DataFrame(inflation_line)
+            # Renamed DataFrame
+            df_renamed = df_line.rename(columns={
+                'year': 'Year',
+                'country': 'Country',
+                'average_inflation': 'Average Inflation',
+                'annual_inflation': 'Annual Inflation'
+            })
             df_line.sort_values(by='year', inplace=True)
             st.subheader(f"Inflation Data for {selected_country}")
-            st.write(df_line[['year', 'country', 'average_inflation', 'annual_inflation']])
+            st.write(df_renamed[['Year', 'Country', 'Average Inflation', 'Annual Inflation']])
 
             # Summary statistics for country
             st.subheader(f"Summary Statistics for {selected_country}")
-            st.write(df_line["average_inflation"].describe())
+            st.write(df_renamed["Average Inflation"].describe())
 
             # Create the line chart with both average and annual inflation
-            st.line_chart(df_line.set_index('year')[['average_inflation', 'annual_inflation']],
+            st.line_chart(df_renamed.set_index('Year')[['Average Inflation', 'Annual Inflation']],
                           color=['#00ffff', '#ff0000'], use_container_width=True)
 
             st.subheader(":chart_with_upwards_trend: Predictive models")
