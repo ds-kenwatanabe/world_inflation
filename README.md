@@ -29,7 +29,7 @@ The [streamlit](https://streamlit.io/) app queries the data and displays it.
 
 A diagram of the ETL process can be seen below:
 
-![ETL Process](images/inflation_etl.svg)
+![ETL Process](images/InflationETL.svg)
 
 
 #### Supabase Database
