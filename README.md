@@ -2,8 +2,7 @@
 
 ❗ Status:
 
-![Static Badge](https://img.shields.io/badge/App-Test-yellow)
-![Static Badge](https://img.shields.io/badge/README-Development-red)
+![Static Badge](https://img.shields.io/badge/App-Live-green)
 
 ### Introduction
 This is a project that has the objective to scrape inflation data from different countries and show the data in a streamlit [app](https://worldinflation.streamlit.app/).
@@ -15,8 +14,8 @@ In the app you can see the average and annual CPI inflation for each country and
   <img src="https://scrapingant.com/blog/img/blog/scrapy-logo.png" title="Windows" alt="Windows" width="100" height="40"/>&nbsp;
   <br>
   <br>
-  <span>Firebase as Database</span>
-  <img src="https://github.com/devicons/devicon/blob/master/icons/firebase/firebase-plain-wordmark.svg" title="Firebase" alt="Firebase" width="50" height="50"/>&nbsp;
+  <span>Supabase as Database</span>
+  <img src="https://github.com/devicons/devicon/blob/master/icons/supabase/supabase-original.svg" title="Supabase" alt="Supabase" width="50" height="50"/>&nbsp;
   <br>
   <br>
   <span>Streamlit for the app</span>
@@ -25,7 +24,7 @@ In the app you can see the average and annual CPI inflation for each country and
 
 
 ### Extract, Transform, Load
-The data was scraped from the [inflation.eu](https://www.inflation.eu/en/) website using [Scrapy](https://scrapy.org/) which also loads the collected data in a [Firebase Database](https://firebase.google.com/). 
+The data was scraped from the [inflation.eu](https://www.inflation.eu/en/) website using [Scrapy](https://scrapy.org/) which also loads the collected data in a [Supabase Database](https://supabase.com/). 
 The [streamlit](https://streamlit.io/) app queries the data and displays it.
 
 A diagram of the ETL process can be seen below:
@@ -33,8 +32,8 @@ A diagram of the ETL process can be seen below:
 ![ETL Process](images/inflation_etl.svg)
 
 
-#### Firestore Database
-It is a scalable NoSQL cloud database, built on Google Cloud infrastructure, to store and sync data. This type of database can be complex, as the documents can have documents nested in them and are not as rigid as SQL databases.
+#### Supabase Database
+It is a scalable PostgreSQL cloud database, you can use authentication, instant APIs, edge functions, realtime subscriptions, storage, and vector embeddings.
 In this case, the database structure is quite simple, if you wish to implement this code, you can change the pipelines to a SQL database like MongoDB or PostgreSQL and run the database locally.
 
 The pipelines set the country name and year as the unique IDs for each document, 
